@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Pool } from 'pg';
 
 //used to get correct version of league of legends
 const fetchVersionFromRiot = async () => {
@@ -55,14 +56,17 @@ const transformItemData = async (item, version) => {
     }
 }
 
+const insertItems = async () => {
+    
+}
+
 
 const processAndStoreItems = async () => {
     try {
         const version = await fetchVersionFromRiot();
         const items = await fetchItemsFromRiot(version);
         const transformedItems = await Promise.all(items.map(item => transformItemData(item, version)));
-        console.log(transformedItems);
-        // await insertItems(transformedItems);
+        await insertItems(transformedItems);
     } catch (error) {
         console.log('Error processing items:', error);
     }
