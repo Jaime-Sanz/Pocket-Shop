@@ -41,19 +41,11 @@ const transformItemData = async (item, version) => {
             description: item.description,
             plaintext: item.plaintext || '',
             gold_total: item.gold.total || 0,
-            img: `https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${item.id}.png`
+            img: `https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${item.id}.png`,
+            tags: item.tags || []
         };
     } catch (error) {
         console.error('Error transforming item data:', error);
-        // Handle the error or return default values
-        return {
-            id: item.id,
-            name: item.name,
-            description: cleanDescription(item.description),
-            plaintext: item.plaintext || '',
-            gold_total: item.gold.total || 0,
-            img: ''  // Or some default image URL
-        };
     }
 }
 
@@ -64,14 +56,15 @@ const insertItems = async (items) => {
 
         for (const item of items) {
             const insertQuery = `
-            INSERT INTO items (id, name, description, plaintext, gold_total, img)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO items (id, name, description, plaintext, gold_total, img, tags)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (id) DO UPDATE
             SET name = EXCLUDED.name,
                 description = EXCLUDED.description,
                 plaintext = EXCLUDED.plaintext,
                 gold_total = EXCLUDED.gold_total,
-                img = EXCLUDED.img;
+                img = EXCLUDED.img,
+                tags = EXCLUDED.tags;
             `;
 
             const values = [
@@ -81,6 +74,7 @@ const insertItems = async (items) => {
                 item.plaintext,
                 item.gold_total,
                 item.img,
+                item.tags,
             ];
 
             await client.query(insertQuery, values);
