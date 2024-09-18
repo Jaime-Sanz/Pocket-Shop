@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Pool } from 'pg';
+import pool from '../../database/pool.js';
 
 //used to get correct version of league of legends
 const fetchVersionFromRiot = async () => {
@@ -31,6 +31,7 @@ const fetchItemsFromRiot = async (latestVersion) => {
     }
 };
 
+
 // Transform item data
 const transformItemData = async (item, version) => {
     try {
@@ -48,7 +49,7 @@ const transformItemData = async (item, version) => {
         return {
             id: item.id,
             name: item.name,
-            description: item.description,
+            description: cleanDescription(item.description),
             plaintext: item.plaintext || '',
             gold_total: item.gold.total || 0,
             img: ''  // Or some default image URL
@@ -56,9 +57,44 @@ const transformItemData = async (item, version) => {
     }
 }
 
-const insertItems = async () => {
-    
-}
+const insertItems = async (items) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        for (const item of items) {
+            const insertQuery = `
+            INSERT INTO items (id, name, description, plaintext, gold_total, img)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (id) DO UPDATE
+            SET name = EXCLUDED.name,
+                description = EXCLUDED.description,
+                plaintext = EXCLUDED.plaintext,
+                gold_total = EXCLUDED.gold_total,
+                img = EXCLUDED.img;
+            `;
+
+            const values = [
+                item.id,
+                item.name,
+                item.description,
+                item.plaintext,
+                item.gold_total,
+                item.img,
+            ];
+
+            await client.query(insertQuery, values);
+        }
+
+        await client.query('COMMIT');
+    }  catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error inserting items:', error);
+        throw error;
+    } finally {
+        client.release();
+    }
+};
 
 
 const processAndStoreItems = async () => {
@@ -67,6 +103,8 @@ const processAndStoreItems = async () => {
         const items = await fetchItemsFromRiot(version);
         const transformedItems = await Promise.all(items.map(item => transformItemData(item, version)));
         await insertItems(transformedItems);
+        console.log('Items inserted successfully');
+        process.exit(0); 
     } catch (error) {
         console.log('Error processing items:', error);
     }
