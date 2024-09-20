@@ -1,5 +1,16 @@
 import axios from 'axios';
 import pool from '../../database/pool.js';
+import sanitizeHTML from 'sanitize-html';
+
+const sanitizeItems = (item) => {
+    return {
+        ...item,
+        description: sanitizeHTML(item.description, {
+            allowedTags: ['mainText', 'stats', 'attention', 'br'],
+            allowedAttributes: {}
+        })
+    };
+};
 
 //used to get correct version of league of legends
 const fetchVersionFromRiot = async () => {
@@ -55,6 +66,8 @@ const insertItems = async (items) => {
         await client.query('BEGIN');
 
         for (const item of items) {
+
+            const sanitizedItem = sanitizeItems(item);
             const insertQuery = `
             INSERT INTO items (id, name, description, plaintext, gold_total, img, tags)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -68,13 +81,13 @@ const insertItems = async (items) => {
             `;
 
             const values = [
-                item.id,
-                item.name,
-                item.description,
-                item.plaintext,
-                item.gold_total,
-                item.img,
-                item.tags,
+                sanitizedItem.id,
+                sanitizedItem.name,
+                sanitizedItem.description,
+                sanitizedItem.plaintext,
+                sanitizedItem.gold_total,
+                sanitizedItem.img,
+                sanitizedItem.tags
             ];
 
             await client.query(insertQuery, values);

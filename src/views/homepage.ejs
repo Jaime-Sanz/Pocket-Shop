@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/header') %> 
+<body>
+    <div class="item-container">
+        <% items.forEach(item => { %>
+            <div class="items">
+                <img src="<%= item.img %>" alt="<%= item.name %>">
+            </div>
+        <% }); %> 
+    </div>
+</body>
+</html>
