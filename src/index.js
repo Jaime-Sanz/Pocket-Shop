@@ -12,8 +12,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 //Serve static assets from public directory
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, '../public')));
 
 //middleware to parse incoming request bodies in URL-encoded format and JSON format
 app.use(express.urlencoded({extended: true}));
