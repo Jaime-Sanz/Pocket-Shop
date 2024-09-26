@@ -1,0 +1,17 @@
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const items = document.querySelectorAll('.item');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+
+        items.forEach(item => {
+            const itemName = item.getAttribute('data-name').toLowerCase();
+            if(itemName.includes(query)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>

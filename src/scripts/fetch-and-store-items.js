@@ -1,7 +1,9 @@
 import axios from 'axios';
 import pool from '../../database/pool.js';
 import sanitizeHTML from 'sanitize-html';
+import { keepItemIds, removeItemsIds } from './itemsArrays.js';
 
+// Sanitize item descriptions
 const sanitizeItems = (item) => {
     return {
         ...item,
@@ -12,27 +14,24 @@ const sanitizeItems = (item) => {
     };
 };
 
-//used to get correct version of league of legends
+// Get the correct version of League of Legends
 const fetchVersionFromRiot = async () => {
     try {
         const versionResponse = await axios.get('https://ddragon.leagueoflegends.com/api/versions.json');
         const versions = versionResponse.data;
         const latestVersion = versions[0];
         console.log('Latest API Version: ', latestVersion);
-        return(latestVersion);
+        return latestVersion;
     } catch (error) {
         console.log('Error fetching API versions: ', error.message);
         throw error;
     }
-}
+};
 
-//used to get items from league of legends
+// Get items from League of Legends
 const fetchItemsFromRiot = async (latestVersion) => {
     try {
-        //getting all items based on latest version of the game
         const itemResponse = await axios.get(`https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/en_US/item.json`);
-
-        //transforming data into object
         return Object.entries(itemResponse.data.data).map(([id, itemData]) => {
             return { id, ...itemData };
         });
@@ -41,7 +40,6 @@ const fetchItemsFromRiot = async (latestVersion) => {
         throw error;
     }
 };
-
 
 // Transform item data
 const transformItemData = async (item, version) => {
@@ -58,15 +56,15 @@ const transformItemData = async (item, version) => {
     } catch (error) {
         console.error('Error transforming item data:', error);
     }
-}
+};
 
+// Insert items into the database
 const insertItems = async (items) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
         for (const item of items) {
-
             const sanitizedItem = sanitizeItems(item);
             const insertQuery = `
             INSERT INTO items (id, name, description, plaintext, gold_total, img, tags)
@@ -94,7 +92,7 @@ const insertItems = async (items) => {
         }
 
         await client.query('COMMIT');
-    }  catch (error) {
+    } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error inserting items:', error);
         throw error;
@@ -103,18 +101,66 @@ const insertItems = async (items) => {
     }
 };
 
+// Filter duplicate items based on name
+const filterDuplicates = (items) => {
+    const uniqueItems = {};
+    items.forEach(item => {
+        if (!uniqueItems[item.name]) {
+            uniqueItems[item.name] = item; // Keep the first instance
+        }
+    });
+    return Object.values(uniqueItems);
+};
 
+// Truncate the items table before inserting new items
+const truncateItemsTable = async () => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('TRUNCATE TABLE items RESTART IDENTITY'); // Clear all rows and reset ID
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error truncating items table:', error);
+    } finally {
+        client.release();
+    }
+};
+
+// Process and store items
 const processAndStoreItems = async () => {
     try {
         const version = await fetchVersionFromRiot();
         const items = await fetchItemsFromRiot(version);
         const transformedItems = await Promise.all(items.map(item => transformItemData(item, version)));
-        await insertItems(transformedItems);
-        console.log('Items inserted successfully');
-        process.exit(0); 
+
+        // Truncate the items table before inserting new items
+        await truncateItemsTable(); // Call this here
+
+
+        // Filter items
+        const filteredItems = transformedItems.filter(item => {
+
+            if(removeItemsIds.includes(item.id)) {
+                console.log(`Item ${item.name} (ID: ${item.id}) is removed regardless of parameters`)
+                return false;
+            };
+
+            if (keepItemIds.includes(item.id)) {
+                console.log(`Item ${item.name} (ID: ${item.id}) is kept regardless of gold total.`);
+                return true; // Keep this item
+            }
+            return item.gold_total > 0; // Include items with a gold_total greater than 0
+        });
+
+        // Insert filtered items into the database
+        await insertItems(filteredItems);
+        console.log('Filtered items inserted successfully');
+        process.exit(0);
     } catch (error) {
         console.log('Error processing items:', error);
     }
 };
 
+// Run the process
 processAndStoreItems();
