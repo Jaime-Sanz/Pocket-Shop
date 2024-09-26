@@ -3,7 +3,7 @@ import pool from '../../database/pool.js';
 import sanitizeHTML from 'sanitize-html';
 import { keepItemIds, removeItemsIds } from './itemsArrays.js';
 
-// Sanitize item descriptions
+// Sanitize item descriptions 
 const sanitizeItems = (item) => {
     return {
         ...item,
@@ -132,17 +132,19 @@ const processAndStoreItems = async () => {
     try {
         const version = await fetchVersionFromRiot();
         const items = await fetchItemsFromRiot(version);
-        const transformedItems = await Promise.all(items.map(item => transformItemData(item, version)));
+        
+        // Filter items by map 11 (Summoner's Rift)
+        const filteredByMap = items.filter(item => item.maps && item.maps['11']);
+
+        const transformedItems = await Promise.all(filteredByMap.map(item => transformItemData(item, version)));
 
         // Truncate the items table before inserting new items
         await truncateItemsTable(); // Call this here
 
-
         // Filter items
         const filteredItems = transformedItems.filter(item => {
-
-            if(removeItemsIds.includes(item.id)) {
-                console.log(`Item ${item.name} (ID: ${item.id}) is removed regardless of parameters`)
+            if (removeItemsIds.includes(item.id)) {
+                console.log(`Item ${item.name} (ID: ${item.id}) is removed regardless of parameters.`);
                 return false;
             };
 
@@ -150,12 +152,16 @@ const processAndStoreItems = async () => {
                 console.log(`Item ${item.name} (ID: ${item.id}) is kept regardless of gold total.`);
                 return true; // Keep this item
             }
+
             return item.gold_total > 0; // Include items with a gold_total greater than 0
         });
 
-        // Insert filtered items into the database
-        await insertItems(filteredItems);
-        console.log('Filtered items inserted successfully');
+        // Deduplicate items by name
+        const deduplicatedItems = filterDuplicates(filteredItems);
+
+        // Insert deduplicated items into the database
+        await insertItems(deduplicatedItems);
+        console.log('Filtered and deduplicated items inserted successfully');
         process.exit(0);
     } catch (error) {
         console.log('Error processing items:', error);
