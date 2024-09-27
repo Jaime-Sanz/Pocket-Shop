@@ -1,7 +1,8 @@
 import express from 'express';
-import { getAllItems, getStarterItems, getToolsItems, 
-        getDefenseItems, getAttackItems, getMagicItems, 
-        getMovementItems, getUncategorizedItems } from '../controllers/items-controller.js';
+import { getAllItems, getStarterItems, getConsumablesTrinkets, getAttackDamageItems, 
+        getCriticalStrikeItems, getAttackSpeedItems, getOnHitEffectsItems, getArmorPenetrationItems, getAbilityPowerItems,
+        getManaRegenerationItems, getMagicPenetrationItems, getHealthRegenerationItems, getArmorItems, getMagicResistanceItems,
+        getAbilityHasteItems, getMovementItems, getLifestealOmnivampItems } from '../controllers/items-controller.js';
 
 const router = express.Router();
 
@@ -10,18 +11,34 @@ router.get('/', getAllItems);
 
 router.get('/starter', getStarterItems);
 
-router.get('/tools', getToolsItems);
+router.get('/consumables-trinkets', getConsumablesTrinkets);
 
-router.get('/defense', getDefenseItems);
+router.get('/attack-damage', getAttackDamageItems);
 
-router.get('/attack', getAttackItems);
+router.get('/critical-strike', getCriticalStrikeItems);
 
-router.get('/magic', getMagicItems);
+router.get('/attack-speed', getAttackSpeedItems);
+
+router.get('/on-hit', getOnHitEffectsItems);
+
+router.get('/armor-penetration', getArmorPenetrationItems);
+
+router.get('/ability-power', getAbilityPowerItems);
+
+router.get('/mana-regeneration', getManaRegenerationItems);
+
+router.get('/magic-penetration', getMagicPenetrationItems);
+
+router.get('/health-regeneration', getHealthRegenerationItems);
+
+router.get('/armor', getArmorItems);
+
+router.get('/magic-resistance', getMagicResistanceItems)
+
+router.get('/ability-haste', getAbilityHasteItems);
 
 router.get('/movement', getMovementItems);
 
-router.get('/uncategorized', getUncategorizedItems)
-
-
+router.get('/lifesteal-omnivamp', getLifestealOmnivampItems);
 
 export default router;
