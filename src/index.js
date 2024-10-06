@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import itemRoute from '../src/routes/items-route.js';
+import allItemsRoute from './routes/all-items-route.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,7 +25,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 //route for all items
-app.use('/', itemRoute);
+app.use('/', allItemsRoute);
+
 
 //Error handling middleware
 app.use((err, req, res, next) => {

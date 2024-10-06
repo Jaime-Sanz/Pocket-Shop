@@ -7,8 +7,8 @@
 
         items.forEach(item => {
             const itemName = item.getAttribute('data-name').toLowerCase();
-            if(itemName.includes(query)) {
-                item.style.display = 'block';
+            if (itemName.includes(query)) {
+                item.style.display = 'flex'; 
             } else {
                 item.style.display = 'none';
             }
