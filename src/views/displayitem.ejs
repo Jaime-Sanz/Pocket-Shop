@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<%- include('partials/header') %>
-<body class="h-screen relative">
-    <div class="absolute inset-0 bg-[url('/images/developerArt.jpg')] bg-cover bg-center"></div>
-    <div class="relative flex h-full z-10">
-        <div class="flex-1 overflow-auto bg-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[5.5px]">
-            
+    <%- include('partials/header') %>
+<body class="h-screen">
+    <div class="absolute inset-0 bg-[url('/images/ornnArt.jpg')] bg-cover bg-center"></div>
+    <div class="absolute inset-0 bg-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[5.5px]"></div>
+    <div class="relative flex justify-center items-center w-full h-full flex-col">
+        <div class="w-[50%] flex justify-end ">
+            <a class="text-white mr-6 border-black border-r-2 border-l-2 border-t-2 p-1 rounded bg-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] backdrop-blur-[5.5px]" href="/">RETURN HOME</a>
+        </div>
+        <div class="flex flex-col border-black border-2 rounded items-center w-[50%] bg-white/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.15)] backdrop-blur-[5.5px]">
+            <h1 class="text-5xl text-white m-2"><%= item.name %></h1>
+            <img class="border-black border-2 rounded-md m-2 w-52 h-52" src="<%= item.img%>" alt="">
+            <h2 class="text-yellow-300 text-lg">Item Cost: <%= item.gold_total %></h2>
+            <p class="mt-2 w-full text-white text-center"><%- item.description %></p>
+            <p class="ml-2 mr-2 mb-2 text-white text-center"><%= item.plaintext %></p>
         </div>
     </div>
 </body>
