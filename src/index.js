@@ -12,30 +12,28 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-//Serve static assets from public directory
+// Serve static assets from public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
-//middleware to parse incoming request bodies in URL-encoded format and JSON format
-app.use(express.urlencoded({extended: true}));
+// Middleware to parse incoming request bodies in URL-encoded format and JSON format
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-//ejs directory setup
+// EJS directory setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-//route for all items
+// Route for all items
 app.use('/', allItemsRoute);
 
-
-//Error handling middleware
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    const statusCode = error.status || 500;
-    res.status(statusCode).json({error: err.message || 'Something went wrong!'});
+    const statusCode = err.status || 500; // Corrected variable name
+    res.status(statusCode).json({ error: err.message || 'Something went wrong!' });
 });
 
-//Start the server and listen to what port the server is running on
+// Start the server and listen to what port the server is running on
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is running on ${process.env.PORT || 3000}`);
 });
