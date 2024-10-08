@@ -4,7 +4,7 @@
   "type": "module",
   "main": "/src/index.js",
   "scripts": {
-    "start": "nodemon src/index.js",
+    "start": "node src/index.js",
     "reload": "node src/scripts/fetch-and-store-items.js",
     "build-css": "tailwindcss build -i ./src/styles.css -o ./public/css/output.css --watch"
   },
