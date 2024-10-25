@@ -3,7 +3,7 @@
 
 For those who would like to run the application and/or edit its source code on their local computer, follow the steps below:
 
-1. Clone the repository with `git clone https://github.com/Jaime-Sanz/Mini-Message-Board](https://github.com/Jaime-Sanz/Pocket-Shop` or download it as a .zip file and extract it.
+1. Clone the repository with `git clone [(https://github.com/Jaime-Sanz/Pocket-Shop)]` or download it as a .zip file and extract it.
 2. Navigate to where the repository is saved on your local machine and run the command npm run "start".
 3. Navigate to localhost:3000.
 
